@@ -30,7 +30,8 @@ activations = {
 
 
 def act_layers(name):
-    assert name in activations.keys()
+    error_message = f"Unknown activation {name}"
+    assert name in activations, error_message
     if name == "LeakyReLU":
         return nn.LeakyReLU(negative_slope=0.1, inplace=True)
     elif name == "GELU":

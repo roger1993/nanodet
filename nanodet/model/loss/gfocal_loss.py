@@ -175,6 +175,6 @@ class DistributionFocalLoss(nn.Module):
         assert reduction_override in (None, "none", "mean", "sum")
         reduction = reduction_override if reduction_override else self.reduction
         loss_cls = self.loss_weight * distribution_focal_loss(
-            pred, target, weight, reduction=reduction, avg_factor=avg_factor
+            pred, target
         )
         return loss_cls

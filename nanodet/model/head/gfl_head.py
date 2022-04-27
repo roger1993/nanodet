@@ -270,8 +270,8 @@ class GFLHead(nn.Module):
                 device
             )
         else:
-            losses_bbox = list(map(lambda x: x / avg_factor, losses_bbox))
-            losses_dfl = list(map(lambda x: x / avg_factor, losses_dfl))
+            losses_bbox = [x / avg_factor for x in losses_bbox]
+            losses_dfl = [x / avg_factor for x in losses_dfl]
 
             loss_qfl = sum(losses_qfl)
             loss_bbox = sum(losses_bbox)
@@ -395,7 +395,7 @@ class GFLHead(nn.Module):
 
         # pixel cell number of multi-level feature maps
         num_level_cells = [grid_cells.size(0) for grid_cells in mlvl_grid_cells_list[0]]
-        num_level_cells_list = [num_level_cells] * batch_size
+        num_level_cells_list = [num_level_cells[:] for _ in range(batch_size)]
         # concat all level cells and to a single tensor
         for i in range(batch_size):
             mlvl_grid_cells_list[i] = torch.cat(mlvl_grid_cells_list[i])

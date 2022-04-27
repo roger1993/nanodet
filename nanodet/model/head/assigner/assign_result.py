@@ -143,8 +143,6 @@ class AssignResult(util_mixins.NiceRepr):
             rng = np.random.mtrand._rand
         elif isinstance(rng, int):
             rng = np.random.RandomState(rng)
-        else:
-            rng = rng
         if num_gts is None:
             num_gts = rng.randint(0, 8)
         if num_preds is None:
