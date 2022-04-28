@@ -40,7 +40,7 @@ def collate_function(batch):
             storage = elem.storage()._new_shared(numel)
             out = elem.new(storage)
         return torch.stack(batch, 0, out=out)
-    elif (
+    if (
         elem_type.__module__ == "numpy"
         and elem_type.__name__ != "str_"
         and elem_type.__name__ != "string_"
@@ -52,7 +52,7 @@ def collate_function(batch):
                 raise TypeError(default_collate_err_msg_format.format(elem.dtype))
 
             return batch
-        elif elem.shape == ():  # scalars
+        if elem.shape == ():  # scalars
             return batch
     elif isinstance(elem, float):
         return torch.tensor(batch, dtype=torch.float64)

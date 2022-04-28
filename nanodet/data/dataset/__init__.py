@@ -13,29 +13,27 @@
 # limitations under the License.
 
 import copy
-import warnings
 
 from .coco import CocoDataset
 from .xml_dataset import XMLDataset
 
 
 def build_dataset(cfg, mode):
+    dataset_map = {
+        "coco": CocoDataset,
+        "xml_dataset": XMLDataset,
+        "CocoDataset": CocoDataset,
+        "XMLDataset": XMLDataset,
+    }
+
     dataset_cfg = copy.deepcopy(cfg)
     name = dataset_cfg.pop("name")
-    if name == "coco":
-        warnings.warn(
-            "Dataset name coco has been deprecated. Please use CocoDataset instead."
-        )
-        return CocoDataset(mode=mode, **dataset_cfg)
-    elif name == "xml_dataset":
-        warnings.warn(
-            "Dataset name xml_dataset has been deprecated. "
-            "Please use XMLDataset instead."
-        )
-        return XMLDataset(mode=mode, **dataset_cfg)
-    elif name == "CocoDataset":
-        return CocoDataset(mode=mode, **dataset_cfg)
-    elif name == "XMLDataset":
-        return XMLDataset(mode=mode, **dataset_cfg)
-    else:
-        raise NotImplementedError("Unknown dataset type!")
+
+    error_message = (
+        f"Unsupported dataset name: {name}, "
+        f"currently supported datasets: {list(dataset_map)}"
+    )
+    assert name in dataset_map, error_message
+    assert mode in ["train", "val", "test"], f"Unknown mode: {mode}"
+
+    return dataset_map[name](mode=mode, **dataset_cfg)

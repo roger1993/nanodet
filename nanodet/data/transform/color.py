@@ -45,14 +45,13 @@ def normalize(meta, mean, std):
     return meta
 
 
-def _normalize(img, mean, std):
-    mean = np.array(mean, dtype=np.float32).reshape(1, 1, 3) / 255
-    std = np.array(std, dtype=np.float32).reshape(1, 1, 3) / 255
-    img = (img - mean) / std
-    return img
-
-
 def color_aug_and_norm(meta, kwargs):
+    def normalize(img, mean, std):
+        mean = np.array(mean, dtype=np.float32).reshape(1, 1, 3) / 255
+        std = np.array(std, dtype=np.float32).reshape(1, 1, 3) / 255
+        img = (img - mean) / std
+        return img
+
     img = meta["img"].astype(np.float32) / 255
 
     if "brightness" in kwargs and random.randint(0, 1):
@@ -63,8 +62,6 @@ def color_aug_and_norm(meta, kwargs):
 
     if "saturation" in kwargs and random.randint(0, 1):
         img = random_saturation(img, *kwargs["saturation"])
-    # cv2.imshow('trans', img)
-    # cv2.waitKey(0)
-    img = _normalize(img, *kwargs["normalize"])
+    img = normalize(img, *kwargs["normalize"])
     meta["img"] = img
     return meta

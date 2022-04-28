@@ -13,14 +13,15 @@
 # limitations under the License.
 import random
 from abc import ABCMeta, abstractmethod
-from typing import Dict, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
 from torch.utils.data import Dataset
 
-from ..transform import Pipeline
+from nanodet.data.transform import Pipeline
 
 
+# TODO: use dataclass to warpper multiple attributes.
 class BaseDataset(Dataset, metaclass=ABCMeta):
     """A base class of detection dataset. Referring from MMDetection. A dataset should have images, annotations and
     preprocessing pipelines NanoDet use [xmin, ymin, xmax, ymax] format for box and.
@@ -57,7 +58,6 @@ class BaseDataset(Dataset, metaclass=ABCMeta):
         mode: str = "train",
         multi_scale: Optional[Tuple[float, float]] = None,
     ):
-        assert mode in ["train", "val", "test"]
         self.img_path = img_path
         self.ann_path = ann_path
         self.input_size = input_size
@@ -69,22 +69,20 @@ class BaseDataset(Dataset, metaclass=ABCMeta):
         self.load_mosaic = load_mosaic
         self.multi_scale = multi_scale
         self.mode = mode
+        self.data_info = self.get_data_info()
 
-        self.data_info = self.get_data_info(ann_path)
-
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.data_info)
 
-    def __getitem__(self, idx):
-        if self.mode == "val" or self.mode == "test":
+    def __getitem__(self, idx: int) -> Dict[str, Any]:
+        if self.mode in ["val", "test"]:
             return self.get_val_data(idx)
-        else:
-            while True:
-                data = self.get_train_data(idx)
-                if data is None:
-                    idx = self.get_another_id()
-                    continue
-                return data
+        while True:
+            data = self.get_train_data(idx)
+            if data is None:
+                idx = self.get_another_id()
+                continue
+            return data
 
     @staticmethod
     def get_random_size(
@@ -100,23 +98,55 @@ class BaseDataset(Dataset, metaclass=ABCMeta):
         Returns:
             Tuple[int, int]
         """
-        assert len(scale_range) == 2
         scale_factor = random.uniform(*scale_range)
         width = int(image_size[0] * scale_factor)
         height = int(image_size[1] * scale_factor)
         return width, height
 
     @abstractmethod
-    def get_data_info(self, ann_path):
-        pass
+    def get_data_info(self) -> List[Dict[str, Any]]:
+        """_summary_
+
+        Returns:
+            List[Dict[str, Any]]: _description_
+        """
 
     @abstractmethod
-    def get_train_data(self, idx):
-        pass
+    def get_train_data(self, idx: int) -> Dict[str, Any]:
+        """_summary_
+
+        Parameters
+        ----------
+        idx : int
+            _description_
+
+        Returns
+        -------
+        Dict[str, Any]
+            _description_
+        """
 
     @abstractmethod
-    def get_val_data(self, idx):
-        pass
+    def get_val_data(self, idx: int) -> Dict[str, Any]:
+        """_summary_
 
-    def get_another_id(self):
+        Parameters
+        ----------
+        idx : int
+            _description_
+
+        Returns
+        -------
+        Dict[str, Any]
+            _description_
+        """
+
+    def get_another_id(self) -> int:
+        """_summary_
+
+        Returns
+        -------
+        int
+            _description_
+        """
         return np.random.random_integers(0, len(self.data_info) - 1)
