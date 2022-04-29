@@ -7,15 +7,6 @@ import torch.nn.functional as F
 def stack_batch_img(
     img_tensors: Sequence[torch.Tensor], divisible: int = 0, pad_value: float = 0.0
 ) -> torch.Tensor:
-    """
-    Args:
-        img_tensors (Sequence[torch.Tensor]):
-        divisible (int):
-        pad_value (float): value to pad
-
-    Returns:
-        torch.Tensor.
-    """
     assert len(img_tensors) > 0
     assert isinstance(img_tensors, (tuple, list))
     assert divisible >= 0

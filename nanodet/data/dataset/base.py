@@ -26,22 +26,38 @@ class BaseDataset(Dataset, metaclass=ABCMeta):
     """A base class of detection dataset. Referring from MMDetection. A dataset should have images, annotations and
     preprocessing pipelines NanoDet use [xmin, ymin, xmax, ymax] format for box and.
 
-     [[x0,y0], [x1,y1] ... [xn,yn]] format for key points.
+    [[x0,y0], [x1,y1] ... [xn,yn]] format for key points.
     instance masks should decode into binary masks for each instance like
     {
         'bbox': [xmin,ymin,xmax,ymax],
         'mask': mask
-     }
+    }
     segmentation mask should decode into binary masks for each class.
-    Args:
-        img_path (str): image data folder
-        ann_path (str): annotation file path or folder
-        use_instance_mask (bool): load instance segmentation data
-        use_seg_mask (bool): load semantic segmentation data
-        use_keypoint (bool): load pose keypoint data
-        load_mosaic (bool): using mosaic data augmentation from yolov4
-        mode (str): 'train' or 'val' or 'test'
-        multi_scale (Tuple[float, float]): Multi-scale factor range.
+
+    Parameters
+    ----------
+    img_path : str
+        image data folder.
+    ann_path : str
+        annotation file path or folder.
+    input_size : Tuple[int, int]
+        input img size.
+    pipeline : Dict
+        pipeline config.
+    keep_ratio : bool, optional
+        keep img ratio, by default True
+    use_instance_mask : bool, optional
+        load instance segmentation data, by default False
+    use_seg_mask : bool, optional
+        load semantic segmentation data, by default False
+    use_keypoint : bool, optional
+        load pose keypoint data, by default False
+    load_mosaic : bool, optional
+        using mosaic data augmentation from yolov4, by default False
+    mode : str, optional
+        'train' or 'val' or 'test', by default "train"
+    multi_scale : Optional[Tuple[float, float]], optional
+        Multi-scale factor range, by default None
     """
 
     def __init__(
@@ -105,48 +121,65 @@ class BaseDataset(Dataset, metaclass=ABCMeta):
 
     @abstractmethod
     def get_data_info(self) -> List[Dict[str, Any]]:
-        """_summary_
+        """Genreate a list of img info dict. Each img info dict should like bellow:
+        {
+            'coco_url': 'http://images.cocoda...000009.jpg',
+            'date_captured': '2013-11-19 20:40:11',
+            'file_name': '000000000009.jpg',
+            'flickr_url': 'http://farm5.staticf...b8d6_z.jpg',
+            'height': 480,
+            'id': 9,
+            'license': 3,
+            'width': 640
+        }
 
         Returns:
-            List[Dict[str, Any]]: _description_
+            List[Dict[str, Any]]: list of img info dict.
         """
 
     @abstractmethod
     def get_train_data(self, idx: int) -> Dict[str, Any]:
-        """_summary_
+        """Generate train data for given `idx` img. bellow is a sample data generate by
+        `CocoDataset`:
+        {
+            'img': tensor([[[ 0.4047,  ...1.8996]]]),
+            'img_info': {
+                'file_name': '000000000139.jpg',
+                'height': 426,
+                'width': 640,
+                'id': 139
+            },
+            'gt_bboxes': array([[144.29268, ...),
+            'gt_labels': array([58, 62, 62, ...]),
+            'warp_matrix': array([[0.73154684, ...]])
+        }
+        * img: tensor of img data.
+        * img_info: dict stores img related information.
+        * gt_bboxes: ground truth bounding box coordinate value.
+        * gt_labels: ground truth label.
+        * warp_matrix: warp matrix.
 
         Parameters
         ----------
         idx : int
-            _description_
+            index value.
 
         Returns
         -------
         Dict[str, Any]
-            _description_
+            train data info for a given `idx`.
         """
 
     @abstractmethod
     def get_val_data(self, idx: int) -> Dict[str, Any]:
-        """_summary_
-
-        Parameters
-        ----------
-        idx : int
-            _description_
-
-        Returns
-        -------
-        Dict[str, Any]
-            _description_
-        """
+        """Please refer to `get_train_data`."""
 
     def get_another_id(self) -> int:
-        """_summary_
+        """Random generate another index value.
 
         Returns
         -------
         int
-            _description_
+            index value.
         """
         return np.random.random_integers(0, len(self.data_info) - 1)

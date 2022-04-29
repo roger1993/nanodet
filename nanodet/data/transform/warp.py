@@ -1,6 +1,7 @@
 import math
 import random
 from typing import Dict, Optional, Tuple
+
 import cv2
 import numpy as np
 
@@ -57,6 +58,7 @@ def get_translate_matrix(translate, width, height):
 
 def get_resize_matrix(raw_shape, dst_shape, keep_ratio):
     """Get resize matrix for resizing raw img to input size.
+
     :param raw_shape: (width, height) of raw image
     :param dst_shape: (width, height) of input image
     :param keep_ratio: whether keep original ratio
@@ -174,6 +176,7 @@ def get_minimum_dst_shape(
 class ShapeTransform:
     """Shape transforms including resize, random perspective, random scale, random stretch, random rotation, random
     shear, random translate, and random flip.
+
     Args:
         keep_ratio: Whether to keep aspect ratio of the image.
         divisible: Make image height and width is divisible by a number.

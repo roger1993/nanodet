@@ -103,6 +103,7 @@ venv.bak/
 # mypy
 .mypy_cache/
 
+# editors
 .vscode
 .idea
 .DS_Store
@@ -118,3 +119,9 @@ work_dirs/
 *.pth
 *.py~
 *.sh~
+
+# data
+coco/
+
+# exp logging
+workspace/

@@ -14,6 +14,7 @@
 
 import functools
 from typing import Dict, Tuple
+
 from .color import color_aug_and_norm
 from .warp import ShapeTransform
 
@@ -21,9 +22,12 @@ from .warp import ShapeTransform
 class Pipeline:
     """Data process pipeline. Apply augmentation and pre-processing on meta_data from dataset.
 
-    Args:
-        cfg (Dict): Data pipeline config.
-        keep_ratio (bool): Whether to keep aspect ratio when resizing image.
+    Parameters
+    ----------
+    cfg : Dict
+        Data pipeline config.
+    keep_ratio : bool
+            Whether to keep aspect ratio when resizing image.
     """
 
     def __init__(self, cfg: Dict, keep_ratio: bool):
