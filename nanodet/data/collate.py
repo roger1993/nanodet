@@ -22,5 +22,4 @@ def naive_collate(batch):
     elem = batch[0]
     if isinstance(elem, dict):
         return {key: naive_collate([d[key] for d in batch]) for key in elem}
-    else:
-        return batch
+    return batch

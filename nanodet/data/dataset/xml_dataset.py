@@ -32,7 +32,6 @@ class CocoXML(COCO):
     """
 
     def __init__(self, annotation):
-        # load dataset
         self.dataset, self.anns, self.cats, self.imgs = {}, {}, {}, {}
         self.imgToAnns, self.catToImgs = defaultdict(list), defaultdict(list)
         self.dataset = annotation
@@ -44,7 +43,17 @@ class XMLDataset(CocoDataset):
         self.class_names = class_names
         super().__init__(**kwargs)
 
-    def xml_to_coco(self, ann_path: str):
+    def get_data_info(self) -> List[Dict[str, Any]]:
+        coco_dict = self._xml_to_coco(self.ann_path)
+        self.coco_api = CocoXML(coco_dict)
+        self.cat_ids = sorted(self.coco_api.getCatIds())
+        self.cat2label = {cat_id: i for i, cat_id in enumerate(self.cat_ids)}
+        self.cats = self.coco_api.loadCats(self.cat_ids)
+        self.img_ids = sorted(self.coco_api.imgs.keys())
+        img_info = self.coco_api.loadImgs(self.img_ids)
+        return img_info
+
+    def _xml_to_coco(self, ann_path: str):
         ann_file_names = self._get_file_list(ann_path, file_type=".xml")
         image_info, annotations = [], []
         categories = [
@@ -52,7 +61,7 @@ class XMLDataset(CocoDataset):
             for idx, supercat in enumerate(self.class_names)
         ]
         ann_id = 1
-        for idx, xml_name in enumerate(ann_file_names):
+        for idx, xml_name in enumerate(ann_file_names, start=1):
             root = ET.parse(os.path.join(ann_path, xml_name)).getroot()
             info = self._parse_info(root, idx)
             image_info.append(info)
@@ -60,12 +69,10 @@ class XMLDataset(CocoDataset):
                 ann = self._get_anno(
                     node,
                     categories,
-                    info["width"],
-                    info["height"],
-                    idx,
-                    ann_id,
+                    info,
                 )
                 if ann is not None:
+                    ann.update({"image_id": idx, "id": ann_id})
                     annotations.append(ann)
                     ann_id += 1
 
@@ -76,18 +83,9 @@ class XMLDataset(CocoDataset):
         }
         return coco_dict
 
-    def get_data_info(self) -> List[Dict[str, Any]]:
-        coco_dict = self.xml_to_coco(self.ann_path)
-        self.coco_api = CocoXML(coco_dict)
-        self.cat_ids = sorted(self.coco_api.getCatIds())
-        self.cat2label = {cat_id: i for i, cat_id in enumerate(self.cat_ids)}
-        self.cats = self.coco_api.loadCats(self.cat_ids)
-        self.img_ids = sorted(self.coco_api.imgs.keys())
-        img_info = self.coco_api.loadImgs(self.img_ids)
-        return img_info
-
     @staticmethod
     def _get_file_list(path, file_type: str = ".xml") -> List[str]:
+        # each img has its own annotation file.
         file_names = []
         for maindir, subdir, file_name_list in os.walk(path):
             for filename in file_name_list:
@@ -110,18 +108,11 @@ class XMLDataset(CocoDataset):
         }
         return info
 
-    def _get_anno(
-        self, node, categories, width, height, image_id, ann_id
-    ) -> Optional[Dict[str, Any]]:
+    def _get_anno(self, node, categories, info) -> Optional[Dict[str, Any]]:
         category = node.find("name").text
         if category not in self.class_names:
             return None
 
-        cat_id = -1
-        for cat in categories:
-            if category == cat["name"]:
-                cat_id = cat["id"]
-                break
         xmin = int(node.find("bndbox").find("xmin").text)
         ymin = int(node.find("bndbox").find("ymin").text)
         xmax = int(node.find("bndbox").find("xmax").text)
@@ -133,15 +124,18 @@ class XMLDataset(CocoDataset):
         coco_box = [
             max(xmin, 0),
             max(ymin, 0),
-            min(w, width),
-            min(h, height),
+            min(w, info["width"]),
+            min(h, info["height"]),
         ]
+        cat_id = None
+        for cat in categories:
+            if category == cat["name"]:
+                cat_id = cat["id"]
+                break
         ann = {
-            "image_id": image_id + 1,
             "bbox": coco_box,
             "category_id": cat_id,
             "iscrowd": 0,
-            "id": ann_id,
             "area": coco_box[2] * coco_box[3],
         }
         return ann

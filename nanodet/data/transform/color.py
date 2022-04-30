@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 import random
 
 import cv2
@@ -46,22 +45,25 @@ def normalize(meta, mean, std):
 
 
 def color_aug_and_norm(meta, kwargs):
+    def use_strategy():
+        return random.randint(0, 1)
+
     def normalize(img, mean, std):
         mean = np.array(mean, dtype=np.float32).reshape(1, 1, 3) / 255
         std = np.array(std, dtype=np.float32).reshape(1, 1, 3) / 255
         img = (img - mean) / std
         return img
 
+    color_aug_strategies = {
+        "brightness": random_brightness,
+        "contrast": random_contrast,
+        "saturation": random_saturation,
+    }
+
     img = meta["img"].astype(np.float32) / 255
-
-    if "brightness" in kwargs and random.randint(0, 1):
-        img = random_brightness(img, kwargs["brightness"])
-
-    if "contrast" in kwargs and random.randint(0, 1):
-        img = random_contrast(img, *kwargs["contrast"])
-
-    if "saturation" in kwargs and random.randint(0, 1):
-        img = random_saturation(img, *kwargs["saturation"])
+    for strategy, aug_func in color_aug_strategies.items():
+        if (strategy in kwargs) & use_strategy():
+            img = aug_func(img, kwargs[strategy])
     img = normalize(img, *kwargs["normalize"])
     meta["img"] = img
     return meta
