@@ -17,9 +17,13 @@ from .coco_detection import CocoDetectionEvaluator
 
 
 def build_evaluator(cfg, dataset):
+    support_evaluators = {"CocoDetectionEvaluator": CocoDetectionEvaluator}
+    support_evaluators_str = ",".join(support_evaluators)
     evaluator_cfg = copy.deepcopy(cfg)
     name = evaluator_cfg.pop("name")
-    if name == "CocoDetectionEvaluator":
-        return CocoDetectionEvaluator(dataset)
-    else:
-        raise NotImplementedError
+
+    error_message = (
+        f"Unknown evaluator {name}. Currently only supported {support_evaluators_str}"
+    )
+    assert name in support_evaluators, error_message
+    return support_evaluators[name](dataset)
