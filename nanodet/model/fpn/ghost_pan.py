@@ -120,10 +120,10 @@ class GhostPAN(nn.Module):
         # build top-down blocks
         self.upsample = nn.Upsample(**upsample_cfg)
         self.reduce_layers = nn.ModuleList()
-        for idx in range(len(in_channels)):
+        for in_channel in in_channels:
             self.reduce_layers.append(
                 ConvModule(
-                    in_channels[idx],
+                    in_channel,
                     out_channels,
                     1,
                     norm_cfg=norm_cfg,
@@ -131,7 +131,7 @@ class GhostPAN(nn.Module):
                 )
             )
         self.top_down_blocks = nn.ModuleList()
-        for idx in range(len(in_channels) - 1, 0, -1):
+        for _ in range(len(in_channels) - 1):
             self.top_down_blocks.append(
                 GhostBlocks(
                     out_channels * 2,
@@ -147,7 +147,7 @@ class GhostPAN(nn.Module):
         # build bottom-up blocks
         self.downsamples = nn.ModuleList()
         self.bottom_up_blocks = nn.ModuleList()
-        for idx in range(len(in_channels) - 1):
+        for _ in range(len(in_channels) - 1):
             self.downsamples.append(
                 conv(
                     out_channels,
@@ -174,7 +174,7 @@ class GhostPAN(nn.Module):
         # extra layers
         self.extra_lvl_in_conv = nn.ModuleList()
         self.extra_lvl_out_conv = nn.ModuleList()
-        for i in range(num_extra_level):
+        for _ in range(num_extra_level):
             self.extra_lvl_in_conv.append(
                 conv(
                     out_channels,

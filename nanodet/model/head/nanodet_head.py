@@ -78,7 +78,6 @@ class NanoDetHead(GFLHead):
                 for _ in self.strides
             ]
         )
-        # TODO: if
         self.gfl_reg = nn.ModuleList(
             [
                 nn.Conv2d(self.feat_channels, 4 * (self.reg_max + 1), 1, padding=0)

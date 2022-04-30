@@ -17,9 +17,9 @@ def reduce_loss(loss, reduction):
     # none: 0, elementwise_mean:1, sum: 2
     if reduction_enum == 0:
         return loss
-    elif reduction_enum == 1:
+    if reduction_enum == 1:
         return loss.mean()
-    elif reduction_enum == 2:
+    if reduction_enum == 2:
         return loss.sum()
 
 

@@ -13,9 +13,9 @@ class SimpleConvHead(nn.Module):
         input_channel,
         feat_channels=256,
         stacked_convs=4,
-        strides=[8, 16, 32],
+        strides=None,
         conv_cfg=None,
-        norm_cfg=dict(type="GN", num_groups=32, requires_grad=True),
+        norm_cfg=None,
         activation="LeakyReLU",
         reg_max=16,
         **kwargs

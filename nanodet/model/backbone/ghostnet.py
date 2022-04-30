@@ -22,9 +22,8 @@ from ..module.activation import act_layers
 def get_url(width_mult=1.0):
     if width_mult == 1.0:
         return "https://raw.githubusercontent.com/huawei-noah/CV-Backbones/master/ghostnet_pytorch/models/state_dict_73.98.pth"  # E501
-    else:
-        logging.info("GhostNet only has 1.0 pretrain model. ")
-        return None
+    logging.info("GhostNet only has 1.0 pretrain model. ")
+    return None
 
 
 def _make_divisible(v, divisor, min_value=None):
@@ -46,8 +45,7 @@ def _make_divisible(v, divisor, min_value=None):
 def hard_sigmoid(x, inplace: bool = False):
     if inplace:
         return x.add_(3.0).clamp_(0.0, 6.0).div_(6.0)
-    else:
-        return F.relu6(x + 3.0) / 6.0
+    return F.relu6(x + 3.0) / 6.0
 
 
 class SqueezeExcite(nn.Module):

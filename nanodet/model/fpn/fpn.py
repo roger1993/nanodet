@@ -95,6 +95,3 @@ class FPN(nn.Module):
             for i in range(used_backbone_levels)
         ]
         return tuple(outs)
-
-
-# if __name__ == '__main__':

@@ -57,8 +57,7 @@ class TinyResBlock(nn.Module):
         x1 = self.mid_conv(x)
         if self.res_type == "add":
             return self.out_conv(x + x1)
-        else:
-            return torch.cat((x1, x), dim=1)
+        return torch.cat((x1, x), dim=1)
 
 
 class CspBlock(nn.Module):
@@ -83,7 +82,7 @@ class CspBlock(nn.Module):
             activation=activation,
         )
         res_blocks = []
-        for i in range(num_res):
+        for _ in range(num_res):
             res_block = TinyResBlock(in_channels, kernel_size, norm_cfg, activation)
             res_blocks.append(res_block)
         self.res_blocks = nn.Sequential(*res_blocks)

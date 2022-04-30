@@ -24,21 +24,18 @@ from .shufflenetv2 import ShuffleNetV2
 
 
 def build_backbone(cfg):
+    support_backbone = {
+        "ResNet": ResNet,
+        "ShuffleNetV2": ShuffleNetV2,
+        "GhostNet": GhostNet,
+        "MobileNetV2": MobileNetV2,
+        "EfficientNetLite": EfficientNetLite,
+        "CustomCspNet": CustomCspNet,
+        "RepVGG": RepVGG,
+    }
+    support_backbone_str = ",".join(support_backbone)
     backbone_cfg = copy.deepcopy(cfg)
     name = backbone_cfg.pop("name")
-    if name == "ResNet":
-        return ResNet(**backbone_cfg)
-    elif name == "ShuffleNetV2":
-        return ShuffleNetV2(**backbone_cfg)
-    elif name == "GhostNet":
-        return GhostNet(**backbone_cfg)
-    elif name == "MobileNetV2":
-        return MobileNetV2(**backbone_cfg)
-    elif name == "EfficientNetLite":
-        return EfficientNetLite(**backbone_cfg)
-    elif name == "CustomCspNet":
-        return CustomCspNet(**backbone_cfg)
-    elif name == "RepVGG":
-        return RepVGG(**backbone_cfg)
-    else:
-        raise NotImplementedError
+    error_message = f"Unknown backbone {name}. Currently supported backbones are: {support_backbone_str}"
+    assert name in support_backbone, error_message
+    return support_backbone[name](**backbone_cfg)

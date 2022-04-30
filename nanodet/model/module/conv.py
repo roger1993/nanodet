@@ -149,7 +149,7 @@ class DepthwiseConvModule(nn.Module):
         padding=0,
         dilation=1,
         bias="auto",
-        norm_cfg=dict(type="BN"),
+        norm_cfg=None,
         activation="ReLU",
         inplace=True,
         order=("depthwise", "dwnorm", "act", "pointwise", "pwnorm", "act"),

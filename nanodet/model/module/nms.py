@@ -109,8 +109,8 @@ def batched_nms(boxes, scores, idxs, nms_cfg, class_agnostic=False):
         scores = scores[keep]
     else:
         total_mask = scores.new_zeros(scores.size(), dtype=torch.bool)
-        for id in torch.unique(idxs):
-            mask = (idxs == id).nonzero(as_tuple=False).view(-1)
+        for idx in torch.unique(idxs):
+            mask = (idxs == idx).nonzero(as_tuple=False).view(-1)
             keep = nms(boxes_for_nms[mask], scores[mask], **nms_cfg_)
             total_mask[mask[keep]] = True
 

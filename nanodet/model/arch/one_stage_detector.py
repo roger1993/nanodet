@@ -25,16 +25,16 @@ from ..head import build_head
 class OneStageDetector(nn.Module):
     def __init__(
         self,
-        backbone_cfg,
-        fpn_cfg=None,
-        head_cfg=None,
+        backbone,
+        fpn=None,
+        head=None,
     ):
         super().__init__()
-        self.backbone = build_backbone(backbone_cfg)
-        if fpn_cfg is not None:
-            self.fpn = build_fpn(fpn_cfg)
-        if head_cfg is not None:
-            self.head = build_head(head_cfg)
+        self.backbone = build_backbone(backbone)
+        if fpn is not None:
+            self.fpn = build_fpn(fpn)
+        if head is not None:
+            self.head = build_head(head)
         self.epoch = 0
 
     def forward(self, x):

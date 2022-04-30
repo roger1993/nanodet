@@ -381,8 +381,8 @@ class NanoDetPlusHead(nn.Module):
         result_list = self.get_bboxes(cls_scores, bbox_preds, meta)
         det_results = {}
         warp_matrixes = (
-            meta["warp_matrix"]
-            if isinstance(meta["warp_matrix"], list)
+            meta["warp_matrix"].cpu().numpy()
+            if isinstance(meta["warp_matrix"], torch.Tensor)
             else meta["warp_matrix"]
         )
         img_heights = (
@@ -482,9 +482,8 @@ class NanoDetPlusHead(nn.Module):
             result_list.append(results)
         return result_list
 
-    def get_single_level_center_priors(
-        self, batch_size, featmap_size, stride, dtype, device
-    ):
+    @staticmethod
+    def get_single_level_center_priors(batch_size, featmap_size, stride, dtype, device):
         """Generate centers of a single stage feature map.
 
         Args:

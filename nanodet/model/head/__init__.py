@@ -7,15 +7,17 @@ from .simple_conv_head import SimpleConvHead
 
 
 def build_head(cfg):
+    support_head = {
+        "GFLHead": GFLHead,
+        "NanoDetHead": NanoDetHead,
+        "NanoDetPlusHead": NanoDetPlusHead,
+        "SimpleConvHead": SimpleConvHead,
+    }
+    support_head_str = ",".join(support_head)
     head_cfg = copy.deepcopy(cfg)
     name = head_cfg.pop("name")
-    if name == "GFLHead":
-        return GFLHead(**head_cfg)
-    elif name == "NanoDetHead":
-        return NanoDetHead(**head_cfg)
-    elif name == "NanoDetPlusHead":
-        return NanoDetPlusHead(**head_cfg)
-    elif name == "SimpleConvHead":
-        return SimpleConvHead(**head_cfg)
-    else:
-        raise NotImplementedError
+    error_message = (
+        f"Unknown head {name}. Currently supported heads are: {support_head_str}"
+    )
+    assert name in support_head, error_message
+    return support_head[name](**head_cfg)

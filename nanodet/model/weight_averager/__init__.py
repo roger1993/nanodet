@@ -18,9 +18,12 @@ from .ema import ExpMovingAverager
 
 
 def build_weight_averager(cfg, device="cpu"):
-    cfg = copy.deepcopy(cfg)
-    name = cfg.pop("name")
-    if name == "ExpMovingAverager":
-        return ExpMovingAverager(**cfg, device=device)
-    else:
-        raise NotImplementedError(f"{name} is not implemented")
+    support_weight_averager = {
+        "ExpMovingAverager": ExpMovingAverager,
+    }
+    support_weight_averager_str = ",".join(support_weight_averager)
+    weight_averager_cfg = copy.deepcopy(cfg)
+    name = weight_averager_cfg.pop("name")
+    error_message = f"Unknown weight_averager {name}. Currently supported heads are: {support_weight_averager_str}"
+    assert name in support_weight_averager, error_message
+    return support_weight_averager[name](**weight_averager_cfg, device=device)

@@ -101,9 +101,9 @@ class GFLHead(nn.Module):
         feat_channels=256,
         stacked_convs=4,
         octave_base_scale=4,
-        strides=[8, 16, 32],
+        strides=None,
         conv_cfg=None,
-        norm_cfg=dict(type="GN", num_groups=32, requires_grad=True),
+        norm_cfg=None,
         reg_max=16,
         **kwargs
     ):
@@ -534,8 +534,8 @@ class GFLHead(nn.Module):
         result_list = self.get_bboxes(cls_scores, bbox_preds, meta)
         det_results = {}
         warp_matrixes = (
-            meta["warp_matrix"]
-            if isinstance(meta["warp_matrix"], list)
+            meta["warp_matrix"].cpu().numpy()
+            if isinstance(meta["warp_matrix"], torch.Tensor)
             else meta["warp_matrix"]
         )
         img_heights = (
