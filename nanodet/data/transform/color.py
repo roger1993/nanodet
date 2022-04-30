@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import random
+from typing import Iterable
 
 import cv2
 import numpy as np
@@ -63,7 +64,10 @@ def color_aug_and_norm(meta, kwargs):
     img = meta["img"].astype(np.float32) / 255
     for strategy, aug_func in color_aug_strategies.items():
         if (strategy in kwargs) & use_strategy():
-            img = aug_func(img, kwargs[strategy])
+            if isinstance(kwargs[strategy], Iterable):
+                img = aug_func(img, *kwargs[strategy])
+            else:
+                img = aug_func(img, kwargs[strategy])
     img = normalize(img, *kwargs["normalize"])
     meta["img"] = img
     return meta

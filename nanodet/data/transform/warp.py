@@ -1,6 +1,6 @@
 import math
 import random
-from typing import Callable, Dict, Optional, Tuple
+from typing import Callable, Dict, Iterable, Optional, Tuple
 
 import cv2
 import numpy as np
@@ -113,7 +113,7 @@ def warp_and_resize(
     C[1, 2] = -height / 2
     for strategy, warp_func in warp_strategies.items():
         if (strategy in warp_kwargs) & use_strategy():
-            if isinstance(warp_kwargs[strategy], tuple):
+            if isinstance(warp_kwargs[strategy], Iterable):
                 C = warp_func(*warp_kwargs[strategy]) @ C
             else:
                 C = warp_func(warp_kwargs[strategy]) @ C
