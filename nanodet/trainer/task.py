@@ -19,12 +19,11 @@ import warnings
 from typing import Any, Dict, List
 
 import torch
-import torch.distributed as dist
 from pytorch_lightning import LightningModule
 from pytorch_lightning.utilities import rank_zero_only
 
 from nanodet.data.batch_process import stack_batch_img
-from nanodet.util import convert_avg_params, gather_results, mkdir
+from nanodet.util import convert_avg_params, mkdir
 
 from ..model.arch import build_model
 from ..model.weight_averager import build_weight_averager
@@ -137,14 +136,9 @@ class TrainingTask(LightningModule):
         Args:
             validation_step_outputs: A list of val outputs
         """
-        results = {}
+        all_results = {}
         for res in validation_step_outputs:
-            results.update(res)
-        all_results = (
-            gather_results(results)
-            if dist.is_available() and dist.is_initialized()
-            else results
-        )
+            all_results.update(res)
         if all_results:
             eval_results = self.evaluator.evaluate(
                 all_results, self.cfg.save_dir, rank=self.local_rank
@@ -180,14 +174,9 @@ class TrainingTask(LightningModule):
         return dets
 
     def test_epoch_end(self, test_step_outputs):
-        results = {}
+        all_results = {}
         for res in test_step_outputs:
-            results.update(res)
-        all_results = (
-            gather_results(results)
-            if dist.is_available() and dist.is_initialized()
-            else results
-        )
+            all_results.update(res)
         if all_results:
             res_json = self.evaluator.results2json(all_results)
             json_path = os.path.join(self.cfg.save_dir, "results.json")

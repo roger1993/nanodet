@@ -3,7 +3,6 @@ import math
 import cv2
 import numpy as np
 import torch
-import torch.distributed as dist
 import torch.nn as nn
 import torch.nn.functional as F
 
@@ -26,10 +25,6 @@ from .assigner.atss_assigner import ATSSAssigner
 
 
 def reduce_mean(tensor):
-    if not (dist.is_available() and dist.is_initialized()):
-        return tensor
-    tensor = tensor.clone()
-    dist.all_reduce(tensor.true_divide(dist.get_world_size()), op=dist.ReduceOp.SUM)
     return tensor
 
 

@@ -11,7 +11,7 @@ from .logger import AverageMeter, Logger, MovingAverage, NanoDetLightningLogger
 from .misc import images_to_levels, multi_apply, unmap
 from .path import collect_files, mkdir
 from .rank_filter import rank_filter
-from .scatter_gather import gather_results, scatter_kwargs
+from .scatter_gather import scatter_kwargs
 from .util_mixins import NiceRepr
 from .visualization import Visualizer, overlay_bbox_cv
 
@@ -32,7 +32,6 @@ __all__ = [
     "unmap",
     "mkdir",
     "rank_filter",
-    "gather_results",
     "scatter_kwargs",
     "NiceRepr",
     "Visualizer",
