@@ -139,9 +139,10 @@ class TrainingTask(LightningModule):
         all_results = {}
         for res in validation_step_outputs:
             all_results.update(res)
-        if all_results:
+        gather_result = self.all_gather(gather_result)
+        if gather_result:
             eval_results = self.evaluator.evaluate(
-                all_results, self.cfg.save_dir, rank=self.local_rank
+                gather_result, self.cfg.save_dir, rank=self.local_rank
             )
             metric = eval_results[self.cfg.evaluator.save_key]
             # save best model
@@ -177,14 +178,15 @@ class TrainingTask(LightningModule):
         all_results = {}
         for res in test_step_outputs:
             all_results.update(res)
-        if all_results:
-            res_json = self.evaluator.results2json(all_results)
+        gather_result = self.all_gather(all_results)
+        if gather_result:
+            res_json = self.evaluator.results2json(gather_result)
             json_path = os.path.join(self.cfg.save_dir, "results.json")
             json.dump(res_json, open(json_path, "w"))
 
             if self.cfg.test_mode == "val":
                 eval_results = self.evaluator.evaluate(
-                    all_results, self.cfg.save_dir, rank=self.local_rank
+                    gather_result, self.cfg.save_dir, rank=self.local_rank
                 )
                 txt_path = os.path.join(self.cfg.save_dir, "eval_results.txt")
                 with open(txt_path, "a") as f:
@@ -238,6 +240,9 @@ class TrainingTask(LightningModule):
             using_native_amp: True if using native amp
             using_lbfgs: True if the matching optimizer is lbfgs
         """
+        # update params
+        optimizer.step(closure=optimizer_closure)
+
         # warm up lr
         if self.trainer.global_step <= self.cfg.schedule.warmup.steps:
             if self.cfg.schedule.warmup.name == "constant":
@@ -258,10 +263,6 @@ class TrainingTask(LightningModule):
                 raise Exception("Unsupported warm up type!")
             for pg in optimizer.param_groups:
                 pg["lr"] = warmup_lr
-
-        # update params
-        optimizer.step(closure=optimizer_closure)
-        optimizer.zero_grad()
 
     def get_progress_bar_dict(self):
         # don't show the version number
